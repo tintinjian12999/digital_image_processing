@@ -7,6 +7,9 @@ extern "C" {
 
     void average_filter_cpp(const uchar* inputImage, uchar* outputImage, int rows, int cols);
     void median_filter_cpp(const uchar* inputImage, uchar* outputImage, int rows, int cols);
+    void fourier_filter_cpp(const uchar* inputImage, uchar* outputImage, int rows, int cols);
+    void sobel_cpp(const uchar* inputImage, uchar* outputImage, int rows, int cols);
+    void fourier_sharp_cpp(const uchar* inputImage, uchar* outputImage, int rows, int cols);
     Mat shift(Mat img);
 
 }
