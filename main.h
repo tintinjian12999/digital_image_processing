@@ -3,10 +3,11 @@
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
 using namespace cv;
+extern "C" {
 
-Mat average_filter(const Mat& inputImage);
-Mat median_filter(const Mat& inputImage);
-Mat fourier_filter(Mat inputImage);
-Mat shift(Mat img);
+    void average_filter_cpp(const uchar* inputImage, uchar* outputImage, int rows, int cols);
+    void median_filter_cpp(const uchar* inputImage, uchar* outputImage, int rows, int cols);
+    Mat shift(Mat img);
 
+}
 #endif
