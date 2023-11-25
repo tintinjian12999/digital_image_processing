@@ -114,19 +114,19 @@ class ImageProcessorGUI:
 
     def lowpass_image(self):
         if self.image is not None:
-        	image_ptr = self.image.ctypes.data_as(POINTER(c_ubyte)
-			if self.image.shape[0] % 2 == 1:
-    			self.image = cv2.resize(self.image, (self.image.shape[1], self.image.shape[0] - 1))
-			if self.image.shape[1] % 2 == 1:
-    			self.image = cv2.resize(self.image, (self.image.shape[1] - 1, self.image.shape[0]))
-        	output_fourier = np.ones_like(self.image) * 255
-        	output_fourier_ptr = output_fourier.ctypes.data_as(POINTER(c_ubyte))
+            image_ptr = self.image.ctypes.data_as(POINTER(c_ubyte))
+            if self.image.shape[0] % 2 == 1:
+                self.image = cv2.resize(self.image, (self.image.shape[1], self.image.shape[0] - 1))
+            if self.image.shape[1] % 2 == 1:
+                self.image = cv2.resize(self.image, (self.image.shape[1] - 1, self.image.shape[0]))
+            output_fourier = np.ones_like(self.image) * 255
+            output_fourier_ptr = output_fourier.ctypes.data_as(POINTER(c_ubyte))
 
-        	image_processing_lib.fourier_filter_cpp(image_ptr, output_fourier_ptr, self.image.shape[0],
+            image_processing_lib.fourier_filter_cpp(image_ptr, output_fourier_ptr, self.image.shape[0],
                                                     self.image.shape[1])
 
-        	self.processed_images['fourier'] = output_fourier
-        	self.show_processed_images()
+            self.processed_images['fourier'] = output_fourier
+            self.show_processed_images()
 
 
 if __name__ == "__main__":
