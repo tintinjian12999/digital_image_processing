@@ -36,17 +36,13 @@ int main() {
 	dft(dftInput1, dftImage1, DFT_COMPLEX_OUTPUT);    //進行 DFT
     
     //遮罩建立 (低通濾波)
-	Mat filter(Size(img.cols, img.rows), CV_32F, Scalar::all(0));
-	int half_x = filter.cols / 2;
-	int half_y = filter.rows / 2;
-	int radius = 150; //遮罩半徑
-	for (int a = 0; a < filter.rows; a++) {
-		for (int b = 0; b < filter.cols; b++) {
-			if (pow((a - half_y), 2) + pow((b - half_x), 2) < pow(radius,2)) {
-				filter.at<float>(a, b) = 1;
-			}
-		}
-	}
+    Mat filter = getGaussianKernel(5, 0.5, CV_32F) * getGaussianKernel(5, 0.5, CV_32F).t();
+
+    // 創建全為1的遮罩
+    //Mat filter(Size(img.cols, img.rows), CV_32F, Scalar::all(1));
+
+    // 將遮罩和高斯核相乘
+    //filter = filter.mul(gaussian);
 	filter = shift(filter); //平移遮罩
 
     //進行低通濾波
@@ -61,5 +57,4 @@ int main() {
 
 	imshow("Original Image", img);
 	waitKey(0);
-}
-
+	}

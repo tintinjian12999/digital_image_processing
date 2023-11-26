@@ -26,7 +26,7 @@ void fourier_filter_cpp(const uchar* inputImage, uchar* outputImage, int rows, i
 	Mat filter(Size(inputMat.cols, inputMat.rows), CV_32F, Scalar::all(0));
 	int half_x = filter.cols / 2;
 	int half_y = filter.rows / 2;
-	int radius = 100; //Mask radius
+	int radius = 80; //Mask radius
 	for (int a = 0; a < filter.rows; a++) {
 		for (int b = 0; b < filter.cols; b++) {
 			if (pow((a - half_y), 2) + pow((b - half_x), 2) < pow(radius,2)) {
@@ -96,4 +96,30 @@ void sobel_cpp(const uchar* inputImage, uchar* outputImage, int rows, int cols) 
 	outputMat.copyTo(Mat(rows, cols, CV_8UC1, outputImage));
 }
 
+void gaussian_blur_cpp(const uchar* inputImage, uchar* outputImage, int rows, int cols) 
+{
+	Mat inputMat(rows, cols, CV_8UC1, const_cast<uchar*>(inputImage));
+    Mat outputMat(rows, cols, CV_8UC1, outputImage);
+	double sigma = 1.0;
+	GaussianBlur(inputMat, outputMat, Size(5, 5), sigma, sigma);
+	outputMat.convertTo(outputMat, CV_8UC1);
+	outputMat.copyTo(Mat(rows, cols, CV_8UC1, outputImage));
+}
+
+void gaussian_lowpass_cpp(const uchar* inputImage, uchar* outputImage, int rows, int cols) {
+    Mat inputMat(rows, cols, CV_8UC1, const_cast<uchar*>(inputImage));
+    Mat outputMat(rows, cols, CV_8UC1, outputImage);
+	Mat filter = cv::getGaussianKernel(5, 0.5, CV_32F) * cv::getGaussianKernel(5, 0.5, CV_32F).t();
+	Mat dftInput1, dftImage1, inverseDFT; 
+	inputMat.convertTo(dftInput1, CV_32F); 
+	dft(dftInput1, dftImage1, DFT_COMPLEX_OUTPUT);   
+	//Create Mask (Highpass)
+	filter = shift(filter);
+	Mat dftImage1_vector(filter.size(), CV_32F, dftImage1.data);
+	dftImage1_vector = dftImage1_vector.mul(filter);
+	imshow("dftImage1_vector", dftImage1_vector); //查看遮罩位置
+	idft(dftImage1, inverseDFT, DFT_SCALE | DFT_REAL_OUTPUT);
+	inverseDFT.convertTo(outputMat, CV_8UC1);
+	outputMat.copyTo(Mat(rows, cols, CV_8UC1, outputImage));
+}
 }

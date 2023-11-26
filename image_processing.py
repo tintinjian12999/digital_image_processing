@@ -5,7 +5,8 @@ from ctypes import POINTER, c_ubyte, c_int
 from tkinter import Tk, Button, Label, PhotoImage, filedialog
 from PIL import Image, ImageTk
 
-image_processing_lib = ctypes.CDLL('./main.so')
+image_processing_lib = ctypes.CDLL('./main.so') # For Linux
+#image_processing_lib = ctypes.CDLL('./main.dll') #For Windows
 
 image_processing_lib.average_filter_cpp.argtypes = [POINTER(c_ubyte),
                                                      POINTER(c_ubyte),
@@ -37,6 +38,17 @@ image_processing_lib.fourier_sharp_cpp.argtypes = [POINTER(c_ubyte),
                                                      c_int]
 image_processing_lib.fourier_sharp_cpp.restype = None
 
+image_processing_lib.gaussian_blur_cpp.argtypes = [POINTER(c_ubyte),
+                                                     POINTER(c_ubyte),
+                                                     c_int,
+                                                     c_int]
+image_processing_lib.gaussian_blur_cpp.restype = None
+
+image_processing_lib.gaussian_lowpass_cpp.argtypes = [POINTER(c_ubyte),
+                                                     POINTER(c_ubyte),
+                                                     c_int,
+                                                     c_int]
+image_processing_lib.gaussian_lowpass_cpp.restype = None
 class ImageProcessorGUI:
     def __init__(self, master):
         self.master = master
@@ -50,10 +62,11 @@ class ImageProcessorGUI:
                                  'fourier': np.ones((300, 300), dtype=np.uint8) * 255,
                                  'sobel': np.ones((300, 300), dtype=np.uint8) * 255,
                                  'fourier_sharp': np.ones((300, 300), dtype=np.uint8) * 255,
+                                 'gaussian_blur': np.ones((300, 300), dtype=np.uint8) * 255,
+                                 'gaussian_lowpass': np.ones((300, 300), dtype=np.uint8) * 255,
                                  'empty0': np.ones((300, 300), dtype=np.uint8) * 255,
                                  'empty1': np.ones((300, 300), dtype=np.uint8) * 255,
-                                 'empty2': np.ones((300, 300), dtype=np.uint8) * 255,
-                                 'empty3': np.ones((300, 300), dtype=np.uint8) * 255}
+                                 'empty2': np.ones((300, 300), dtype=np.uint8) * 255}
 
 
         self.processed_labels = {}
@@ -64,16 +77,19 @@ class ImageProcessorGUI:
         self.load_button.grid(row=3, column=0, columnspan=2)
 
         self.smooth_button = Button(master, text="Smooth Filter", command=self.smooth_filter)
-        self.smooth_button.grid(row=4, column=0)
+        self.smooth_button.grid(row=4, column=0, columnspan=2)
 
         self.average_button = Button(master, text="Sharp", command=self.sharp)
-        self.average_button.grid(row=4, column=1)
+        self.average_button.grid(row=4, column=1, columnspan=2)
 
-        self.lowpass_button = Button(master, text="Lowpass Filter", command=self.smooth_filter)
+        self.lowpass_button = Button(master, text="Gaussian blur", command=self.gaussian_blur)
         self.lowpass_button.grid(row=5, column=0, columnspan=2)
 
+        self.lowpass_button = Button(master, text="Gaussian lowpass", command=self.gaussian_lowpass)
+        self.lowpass_button.grid(row=5, column=2, columnspan=2)
+
         self.lowpass_button = Button(master, text="clear", command=self.init_images)
-        self.lowpass_button.grid(row=6, column=0, columnspan=2)
+        self.lowpass_button.grid(row=6, column=0)
 
     def init_images(self):
         self.image = np.ones((300, 300), dtype=np.uint8) * 255
@@ -152,6 +168,36 @@ class ImageProcessorGUI:
                                                     self.image.shape[1])
             self.processed_images['sobel'] = output_sobel
             self.processed_images['fourier_sharp'] = output_fourier_sharp
+            self.show_processed_images(method_set)
+    def gaussian_blur(self):
+        if self.image is not None:
+            method_set = ['gaussian_blur']
+            for i, method in enumerate(['gaussian_blur']):
+                label = Label(self.master, text=f"{method.capitalize()} Filter")
+                col_num = 0 if i in [0] else 3
+                label.grid(row=1, column=3, columnspan=3)
+                self.processed_labels[method] = label
+            image_ptr = self.image.ctypes.data_as(POINTER(c_ubyte))
+            output_gaussian_blur = np.ones_like(self.image) * 255
+            output_gaussian_blur_ptr = output_gaussian_blur.ctypes.data_as(POINTER(c_ubyte))
+            image_processing_lib.gaussian_blur_cpp(image_ptr, output_gaussian_blur_ptr, self.image.shape[0],
+                                                    self.image.shape[1])
+            self.processed_images['gaussian_blur'] = output_gaussian_blur
+            self.show_processed_images(method_set)
+    def gaussian_lowpass(self):
+        if self.image is not None:
+            method_set = ['gaussian_lowpass']
+            for i, method in enumerate(['gaussian_lowpass']):
+                label = Label(self.master, text=f"{method.capitalize()} Filter")
+                col_num = 0 if i in [0] else 3
+                label.grid(row=1, column=3, columnspan=3)
+                self.processed_labels[method] = label
+            image_ptr = self.image.ctypes.data_as(POINTER(c_ubyte))
+            output_gaussian_lowpass = np.ones_like(self.image) * 255
+            output_gaussian_lowpass_ptr = output_gaussian_lowpass.ctypes.data_as(POINTER(c_ubyte))
+            image_processing_lib.gaussian_lowpass_cpp(image_ptr, output_gaussian_lowpass_ptr, self.image.shape[0],
+                                                    self.image.shape[1])
+            self.processed_images['gaussian_lowpass'] = output_gaussian_lowpass
             self.show_processed_images(method_set)
 if __name__ == "__main__":
     root = Tk()

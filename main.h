@@ -10,6 +10,8 @@ extern "C" {
     void fourier_filter_cpp(const uchar* inputImage, uchar* outputImage, int rows, int cols);
     void sobel_cpp(const uchar* inputImage, uchar* outputImage, int rows, int cols);
     void fourier_sharp_cpp(const uchar* inputImage, uchar* outputImage, int rows, int cols);
+    void gaussian_blur_cpp(const uchar* inputImage, uchar* outputImage, int rows, int cols);
+    void gaussian_lowpass_cpp(const uchar* inputImage, uchar* outputImage, int rows, int cols);
     Mat shift(Mat img);
 
 }
