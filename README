@@ -1,6 +1,6 @@
 To compile the c++ code
 pls use
-g++ -shared -fPIC -o main.dll main.cpp $(pkg-config --cflags --libs opencv4)
+g++ -shared -fPIC -o main.so main.cpp $(pkg-config --cflags --libs opencv4)
 After compiling the c++ code. Run the code by 
 python3 image_processing.py
 
